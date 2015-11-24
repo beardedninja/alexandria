@@ -20,24 +20,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.android.gms.common.api.CommonStatusCodes;
+
 import it.jaschke.alexandria.data.AlexandriaContract;
 import it.jaschke.alexandria.services.BookService;
 import it.jaschke.alexandria.services.DownloadImage;
 
 
 public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
-    private static final String TAG = "INTENT_TO_SCAN_ACTIVITY";
     private EditText ean;
     private final int LOADER_ID = 1;
     private View rootView;
     private final String EAN_CONTENT="eanContent";
-    private static final String SCAN_FORMAT = "scanFormat";
-    private static final String SCAN_CONTENTS = "scanContents";
+    public static final String AutoFocus = "AUTO_FOCUS";
+    public static final String UseFlash = "USE_FLASH";
 
-    private String mScanFormat = "Format:";
-    private String mScanContents = "Contents:";
-
-
+    static final int SCAN_BARCODE_REQUEST = 1;
+    static final int RESULT_OK = 1;
+    static final int RESULT_FAILED = -1;
 
     public AddBook(){
     }
@@ -69,40 +69,18 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
             @Override
             public void afterTextChanged(Editable s) {
-                String ean =s.toString();
-                //catch isbn10 numbers
-                if(ean.length()==10 && !ean.startsWith("978")){
-                    ean="978"+ean;
-                }
-                if(ean.length()<13){
-                    clearFields();
-                    return;
-                }
-                //Once we have an ISBN, start a book intent
-                Intent bookIntent = new Intent(getActivity(), BookService.class);
-                bookIntent.putExtra(BookService.EAN, ean);
-                bookIntent.setAction(BookService.FETCH_BOOK);
-                getActivity().startService(bookIntent);
-                AddBook.this.restartLoader();
+                fetchBook(s);
             }
         });
 
         rootView.findViewById(R.id.scan_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // This is the callback method that the system will invoke when your button is
-                // clicked. You might do this by launching another app or by including the
-                //functionality directly in this app.
-                // Hint: Use a Try/Catch block to handle the Intent dispatch gracefully, if you
-                // are using an external app.
-                //when you're done, remove the toast below.
-                Context context = getActivity();
-                CharSequence text = "This button should let you scan a book for its barcode!";
-                int duration = Toast.LENGTH_SHORT;
+                Intent captureIntent = new Intent(getActivity(), CaptureActivity.class);
+                captureIntent.putExtra(AutoFocus, true);
+                captureIntent.putExtra(UseFlash, true);
 
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
-
+                startActivityForResult(captureIntent, SCAN_BARCODE_REQUEST);
             }
         });
 
@@ -130,6 +108,28 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         }
 
         return rootView;
+    }
+
+    public void updateBook(String code) {
+        ean.setText(code);
+    }
+
+    private void fetchBook(CharSequence code) {
+        String ean = code.toString();
+        //catch isbn10 numbers
+        if(ean.length()==10 && !ean.startsWith("978")){
+            ean="978"+ean;
+        }
+        if(ean.length()<13){
+            clearFields();
+            return;
+        }
+        //Once we have an ISBN, start a book intent
+        Intent bookIntent = new Intent(getActivity(), BookService.class);
+        bookIntent.putExtra(BookService.EAN, ean);
+        bookIntent.setAction(BookService.FETCH_BOOK);
+        getActivity().startService(bookIntent);
+        AddBook.this.restartLoader();
     }
 
     private void restartLoader(){

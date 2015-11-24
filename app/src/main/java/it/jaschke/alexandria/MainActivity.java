@@ -17,6 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.CommonStatusCodes;
+
 import it.jaschke.alexandria.api.Callback;
 
 
@@ -36,6 +38,10 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
     public static final String MESSAGE_EVENT = "MESSAGE_EVENT";
     public static final String MESSAGE_KEY = "MESSAGE_EXTRA";
+
+    private static final String ADD_BOOK_TAG = "ADD_BOOK";
+    private static final String LIST_BOOK_TAG = "LIST_BOOK";
+    private static final String ABOUT_TAG = "ABOUT";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,23 +71,27 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment nextFragment;
+        String fragmentTag;
 
         switch (position){
             default:
             case 0:
                 nextFragment = new ListOfBooks();
+                fragmentTag = LIST_BOOK_TAG;
                 break;
             case 1:
                 nextFragment = new AddBook();
+                fragmentTag = ADD_BOOK_TAG;
                 break;
             case 2:
                 nextFragment = new About();
+                fragmentTag = ABOUT_TAG;
                 break;
 
         }
 
         fragmentManager.beginTransaction()
-                .replace(R.id.container, nextFragment)
+                .replace(R.id.container, nextFragment, fragmentTag)
                 .addToBackStack((String) title)
                 .commit();
     }
@@ -178,5 +188,19 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         super.onBackPressed();
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        //if (requestCode == SCAN_BARCODE_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == CommonStatusCodes.SUCCESS) {
+            AddBook addBookFragment = (AddBook) getSupportFragmentManager().findFragmentByTag(ADD_BOOK_TAG);
+            if (addBookFragment != null) {
+                addBookFragment.updateBook(data.getStringExtra("BARCODE"));
+                Toast.makeText(MainActivity.this, data.getStringExtra("BARCODE"), Toast.LENGTH_LONG).show();
+            }
+        }
+        //}
+    }
 }
