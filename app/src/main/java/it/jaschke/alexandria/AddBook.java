@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import it.jaschke.alexandria.data.AlexandriaContract;
 import it.jaschke.alexandria.services.BookService;
@@ -67,6 +68,8 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             @Override
             public void onClick(View v) {
                 Intent captureIntent = new Intent(getActivity(), CaptureActivity.class);
+
+                // TODO: Add preferences for these settings.
                 captureIntent.putExtra(Constants.AUTO_FOCUS, true);
                 captureIntent.putExtra(Constants.USE_FLASH, true);
 
