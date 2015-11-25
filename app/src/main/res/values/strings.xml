@@ -24,6 +24,7 @@
     <string name="action_share">Share</string>
     <string name="back_button">go back</string>
     <string name="share_text">A must read book: </string>
+    <string name="connection_error">Connection failure. Please check internet connection settings and try again.</string>
 
     <!-- Barcode capture related strings -->
     <string name="ok">OK</string>

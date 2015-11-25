@@ -72,7 +72,8 @@ public class BookService extends IntentService {
      */
     private void fetchBook(String ean) {
 
-        if(ean.length()!=13){
+        // An extra null check here to avoid a crash when checking length
+        if(ean == null || ean.length() != 13){
             return;
         }
 
@@ -84,12 +85,15 @@ public class BookService extends IntentService {
                 null  // sort order
         );
 
-        if(bookEntry.getCount()>0){
-            bookEntry.close();
+        // bookEntry maybe null here so we check first before accessing getCount()
+        if (bookEntry != null) {
+           if (bookEntry.getCount()>0) {
+               bookEntry.close();
+               return;
+           }
+        } else {
             return;
         }
-
-        bookEntry.close();
 
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -130,6 +134,16 @@ public class BookService extends IntentService {
             bookJsonString = buffer.toString();
         } catch (Exception e) {
             Log.e(LOG_TAG, "Error ", e);
+
+            // Fixed bug: If we caught an exception here, there's no point going on and trying to
+            // parse the result which could be empty or half constructed. So we send a useful message
+            // back and return.
+
+            Intent messageIntent = new Intent(MainActivity.MESSAGE_EVENT);
+            messageIntent.putExtra(MainActivity.MESSAGE_KEY,getResources().getString(R.string.connection_error));
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(messageIntent);
+            return;
+
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
