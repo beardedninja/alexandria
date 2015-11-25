@@ -37,6 +37,7 @@ import java.io.IOException;
 
 import it.jaschke.alexandria.camera.ui.CameraSourcePreview;
 import it.jaschke.alexandria.camera.ui.GraphicOverlay;
+import it.jaschke.alexandria.utils.Constants;
 
 /**
  * Created by alex on 24/11/15.
@@ -54,11 +55,6 @@ public class CaptureActivity extends AppCompatActivity {
 
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
-
-    // constants used to pass extra data in the intent
-    public static final String AUTO_FOCUS = "AUTO_FOCUS";
-    public static final String USE_FLASH = "USE_FLASH";
-    public static final String BARCODE = "BARCODE";
 
     private CameraSource mCameraSource;
     private CameraSourcePreview mPreview;
@@ -80,8 +76,8 @@ public class CaptureActivity extends AppCompatActivity {
         mGraphicOverlay = (GraphicOverlay<BarcodeGraphic>) findViewById(R.id.graphicOverlay);
 
         // read parameters from the intent used to launch the activity.
-        boolean autoFocus = getIntent().getBooleanExtra(AUTO_FOCUS, false);
-        boolean useFlash = getIntent().getBooleanExtra(USE_FLASH, false);
+        boolean autoFocus = getIntent().getBooleanExtra(Constants.AUTO_FOCUS, false);
+        boolean useFlash = getIntent().getBooleanExtra(Constants.USE_FLASH, false);
 
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
@@ -265,8 +261,8 @@ public class CaptureActivity extends AppCompatActivity {
         if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "Camera permission granted - initialize the camera source");
             // we have permission, so create the camerasource
-            boolean autoFocus = getIntent().getBooleanExtra(AUTO_FOCUS,false);
-            boolean useFlash = getIntent().getBooleanExtra(USE_FLASH, false);
+            boolean autoFocus = getIntent().getBooleanExtra(Constants.AUTO_FOCUS,false);
+            boolean useFlash = getIntent().getBooleanExtra(Constants.USE_FLASH, false);
             createCameraSource(autoFocus, useFlash);
             return;
         }
@@ -322,15 +318,13 @@ public class CaptureActivity extends AppCompatActivity {
      * @return true if the activity is ending.
      */
     private boolean onTap(float rawX, float rawY) {
-
-        //TODO: use the tap position to select the barcode.
         BarcodeGraphic graphic = mGraphicOverlay.getFirstGraphic();
         Barcode barcode = null;
         if (graphic != null) {
             barcode = graphic.getBarcode();
             if (barcode != null) {
                 Intent data = new Intent();
-                data.putExtra(BARCODE, barcode.rawValue);
+                data.putExtra(Constants.BARCODE_DATA, barcode.rawValue);
                 setResult(CommonStatusCodes.SUCCESS, data);
                 finish();
             }

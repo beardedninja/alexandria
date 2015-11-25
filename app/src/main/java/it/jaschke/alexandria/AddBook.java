@@ -1,7 +1,6 @@
 package it.jaschke.alexandria;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -17,14 +16,11 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-
-import com.google.android.gms.common.api.CommonStatusCodes;
 
 import it.jaschke.alexandria.data.AlexandriaContract;
 import it.jaschke.alexandria.services.BookService;
 import it.jaschke.alexandria.services.DownloadImage;
+import it.jaschke.alexandria.utils.Constants;
 
 
 public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -32,12 +28,6 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     private final int LOADER_ID = 1;
     private View rootView;
     private final String EAN_CONTENT="eanContent";
-    public static final String AutoFocus = "AUTO_FOCUS";
-    public static final String UseFlash = "USE_FLASH";
-
-    static final int SCAN_BARCODE_REQUEST = 1;
-    static final int RESULT_OK = 1;
-    static final int RESULT_FAILED = -1;
 
     public AddBook(){
     }
@@ -77,10 +67,10 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             @Override
             public void onClick(View v) {
                 Intent captureIntent = new Intent(getActivity(), CaptureActivity.class);
-                captureIntent.putExtra(AutoFocus, true);
-                captureIntent.putExtra(UseFlash, true);
+                captureIntent.putExtra(Constants.AUTO_FOCUS, true);
+                captureIntent.putExtra(Constants.USE_FLASH, true);
 
-                startActivityForResult(captureIntent, SCAN_BARCODE_REQUEST);
+                getActivity().startActivityForResult(captureIntent, Constants.SCAN_BARCODE_REQUEST);
             }
         });
 
